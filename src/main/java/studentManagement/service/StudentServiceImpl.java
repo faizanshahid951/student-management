@@ -45,8 +45,7 @@ public class StudentServiceImpl implements StudentService {
     public StudentDTO updateStudent(String id, StudentDTO studentDTO) {
 
         StudentDomain existingStudent = studentRepo.findById(id)
-                .orElseThrow(() -> new RuntimeException(
-                        "Student not found with ID: " + id));
+          .orElseThrow(() -> new RuntimeException("Student not found with ID: " + id));
 
         existingStudent.setFirstname(studentDTO.getFirstname());
         existingStudent.setLastname(studentDTO.getLastname());
