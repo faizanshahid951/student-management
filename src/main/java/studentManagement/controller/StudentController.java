@@ -55,4 +55,8 @@ public class StudentController {
     public ResponseEntity<List<StudentDTO>> getStudentsByCgpa(@PathVariable double cgpa) {
         return ResponseEntity.ok(studentService.getStudentByCgpa(cgpa));
     }
+    @GetMapping("/sorted")
+    public ResponseEntity<List<StudentDTO>> getAllStudentByOrderByCgpaDesc() {
+        return ResponseEntity.ok(studentService.findAllByOrderByCgpaDesc());
+    }
 }

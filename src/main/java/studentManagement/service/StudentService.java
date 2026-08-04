@@ -19,4 +19,6 @@ public interface StudentService {
     List<StudentDTO> getStudentByCourse(String course);
 
     List<StudentDTO> getStudentByCgpa(double cgpa);
+
+    List<StudentDTO> findAllByOrderByCgpaDesc();
 }

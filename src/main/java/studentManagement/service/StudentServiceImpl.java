@@ -77,4 +77,12 @@ public class StudentServiceImpl implements StudentService {
                 .map(studentTransformer::toStudentDTO)
                 .toList();
     }
+    @Override
+    public List<StudentDTO> findAllByOrderByCgpaDesc(){
+        List<StudentDomain> students = studentRepo.findAllByOrderByCgpaDesc();
+
+        return students.stream()
+                .map(studentTransformer::toStudentDTO)
+                .toList();
+    }
 }

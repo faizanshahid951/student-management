@@ -9,4 +9,5 @@ public interface StudentRepo extends MongoRepository<StudentDomain, String> {
 
     List<StudentDomain> findByCourseIgnoreCase(String course);
     List<StudentDomain> findByCgpa(double cgpa);
+    List<StudentDomain> findAllByOrderByCgpaDesc();
 }
