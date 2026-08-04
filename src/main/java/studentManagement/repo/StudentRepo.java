@@ -8,5 +8,5 @@ import java.util.List;
 public interface StudentRepo extends MongoRepository<StudentDomain, String> {
 
     List<StudentDomain> findByCourseIgnoreCase(String course);
-
+    List<StudentDomain> findByCgpa(double cgpa);
 }

@@ -68,4 +68,13 @@ public class StudentServiceImpl implements StudentService {
                 .map(studentTransformer::toStudentDTO)
                 .toList();
     }
+    @Override
+    public List<StudentDTO> getStudentByCgpa(double cgpa) {
+
+        List<StudentDomain> students = studentRepo.findByCgpa(cgpa);
+
+        return students.stream()
+                .map(studentTransformer::toStudentDTO)
+                .toList();
+    }
 }

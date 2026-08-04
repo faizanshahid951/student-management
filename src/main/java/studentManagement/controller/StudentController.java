@@ -51,4 +51,8 @@ public class StudentController {
     public ResponseEntity<List<StudentDTO>> getStudentsByCourse(@PathVariable String course) {
         return ResponseEntity.ok(studentService.getStudentByCourse(course));
     }
+    @GetMapping("/cgpa/{cgpa}")
+    public ResponseEntity<List<StudentDTO>> getStudentsByCgpa(@PathVariable double cgpa) {
+        return ResponseEntity.ok(studentService.getStudentByCgpa(cgpa));
+    }
 }

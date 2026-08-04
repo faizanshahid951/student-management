@@ -17,4 +17,6 @@ public interface StudentService {
     StudentDTO updateStudent(String id, StudentDTO studentDTO);
 
     List<StudentDTO> getStudentByCourse(String course);
+
+    List<StudentDTO> getStudentByCgpa(double cgpa);
 }
