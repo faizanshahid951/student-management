@@ -2,7 +2,6 @@ package studentManagement.service;
 
 import studentManagement.domain.StudentDomain;
 import studentManagement.dto.StudentDTO;
-
 import java.util.List;
 
 public interface StudentService {
