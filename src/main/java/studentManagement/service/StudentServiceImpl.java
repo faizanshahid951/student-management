@@ -48,11 +48,6 @@ public class StudentServiceImpl implements StudentService {
                 .orElseThrow(() -> new RuntimeException(
                         "Student not found with ID: " + id));
 
-
-
-
-
-
         existingStudent.setFirstname(studentDTO.getFirstname());
         existingStudent.setLastname(studentDTO.getLastname());
         existingStudent.setAge(studentDTO.getAge());
@@ -63,5 +58,15 @@ public class StudentServiceImpl implements StudentService {
         StudentDomain updatedStudent = studentRepo.save(existingStudent);
 
         return studentTransformer.toStudentDTO(updatedStudent);
+    }
+
+    @Override
+    public List<StudentDTO> getStudentByCourse(String course) {
+
+        List<StudentDomain> students = studentRepo.findByCourseIgnoreCase(course);
+
+        return students.stream()
+                .map(studentTransformer::toStudentDTO)
+                .toList();
     }
 }

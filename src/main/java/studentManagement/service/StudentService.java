@@ -18,4 +18,6 @@ public interface StudentService {
     StudentDTO getStudentById(String id);
 
     StudentDTO updateStudent(String id, StudentDTO studentDTO);
+
+    List<StudentDTO> getStudentByCourse(String course);
 }

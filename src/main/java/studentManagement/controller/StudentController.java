@@ -47,4 +47,8 @@ public class StudentController {
 
         return ResponseEntity.ok(updatedStudent);
     }
+    @GetMapping("/course/{course}")
+    public ResponseEntity<List<StudentDTO>> getStudentsByCourse(@PathVariable String course) {
+        return ResponseEntity.ok(studentService.getStudentByCourse(course));
+    }
 }
