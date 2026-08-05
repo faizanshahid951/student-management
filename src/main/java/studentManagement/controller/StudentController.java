@@ -20,10 +20,9 @@ public class StudentController {
     @GetMapping
     public ResponseEntity<Page<StudentDTO>> getAllStudent(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "5") int size) {
+            @RequestParam(defaultValue = "10") int size) {
 
-        return ResponseEntity.ok(studentService.getAllStudent(page, size)
-        );
+        return ResponseEntity.ok(studentService.getAllStudent(page, size));
     }
 
     @PostMapping
