@@ -1,5 +1,8 @@
 package studentManagement.service;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import studentManagement.domain.StudentDomain;
 import studentManagement.dto.StudentDTO;
 import studentManagement.repo.StudentRepo;
@@ -23,14 +26,18 @@ public class StudentServiceImpl implements StudentService {
     }
 
     @Override
-    public List<StudentDomain> getAllStudent(){
-        return studentRepo.findAll();
+    public Page<StudentDTO> getAllStudent(int page, int size) {
+
+        Pageable pageable = PageRequest.of(page, size);
+        Page<StudentDomain> students = studentRepo.findAll(pageable);
+        return students.map(studentTransformer::toStudentDTO);
     }
 
     @Override
     public void deleteStudent(String id) {
         studentRepo.deleteById(id);
     }
+
     @Override
     public StudentDTO getStudentById(String id) {
 

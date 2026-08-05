@@ -1,5 +1,6 @@
 package studentManagement.service;
 
+import org.springframework.data.domain.Page;
 import studentManagement.domain.StudentDomain;
 import studentManagement.dto.StudentDTO;
 import java.util.List;
@@ -8,7 +9,7 @@ public interface StudentService {
 
     StudentDTO saveStudent(StudentDTO studentDTO);
 
-    List<StudentDomain> getAllStudent();
+    Page<StudentDTO> getAllStudent(int page, int size);
 
     void deleteStudent(String id);
 

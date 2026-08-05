@@ -1,6 +1,6 @@
 package studentManagement.controller;
 
-import studentManagement.domain.StudentDomain;
+import org.springframework.data.domain.Page;
 import studentManagement.dto.StudentDTO;
 import studentManagement.service.StudentService;
 import jakarta.validation.Valid;
@@ -18,8 +18,12 @@ public class StudentController {
     private final StudentService studentService;
 
     @GetMapping
-    public ResponseEntity<List<StudentDomain>> getAllStudent(){
-        return ResponseEntity.ok(studentService.getAllStudent());
+    public ResponseEntity<Page<StudentDTO>> getAllStudent(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size) {
+
+        return ResponseEntity.ok(studentService.getAllStudent(page, size)
+        );
     }
 
     @PostMapping
