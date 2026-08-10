@@ -5,6 +5,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import studentManagement.domain.StudentDomain;
 import studentManagement.dto.StudentDTO;
+import studentManagement.exception.StudentNotFoundException;
 import studentManagement.repo.StudentRepo;
 import studentManagement.transformer.StudentTransformer;
 import lombok.RequiredArgsConstructor;
@@ -35,14 +36,21 @@ public class StudentServiceImpl implements StudentService {
 
     @Override
     public void deleteStudent(String id) {
-        studentRepo.deleteById(id);
-    }
 
+        StudentDomain student = studentRepo.findById(id)
+                .orElseThrow(() ->
+                        new StudentNotFoundException(
+                                "Student not found with ID: " + id
+                        )
+                );
+
+        studentRepo.delete(student);
+    }
     @Override
     public StudentDTO getStudentById(String id) {
 
         StudentDomain student = studentRepo.findById(id)
-                .orElseThrow(() -> new RuntimeException(
+                .orElseThrow(() -> new StudentNotFoundException(
                         "Student not found with ID: " + id
                 ));
 
@@ -52,7 +60,8 @@ public class StudentServiceImpl implements StudentService {
     public StudentDTO updateStudent(String id, StudentDTO studentDTO) {
 
         StudentDomain existingStudent = studentRepo.findById(id)
-          .orElseThrow(() -> new RuntimeException("Student not found with ID: " + id));
+          .orElseThrow(() -> new StudentNotFoundException(
+                  "Student not found with ID: " + id));
 
         existingStudent.setFirstname(studentDTO.getFirstname());
         existingStudent.setLastname(studentDTO.getLastname());
