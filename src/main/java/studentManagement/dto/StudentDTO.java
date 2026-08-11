@@ -1,5 +1,6 @@
 package studentManagement.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.*;
 import lombok.*;
 import org.springframework.data.annotation.Id;
@@ -16,6 +17,9 @@ public class StudentDTO {
     private String firstname;
     @NotBlank
     private String lastname;
+    @NotBlank(message = "email is required")
+    @Email
+    private String email;
 
     @NotNull(message = "Age is required")
     @Min(17)
@@ -31,4 +35,13 @@ public class StudentDTO {
     @DecimalMin(value = "0.0", message = "CGPA cannot be below 0")
     @DecimalMax(value = "4.0", message = "CGPA cannot be greater than 4")
     private Double cgpa;
+
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    private String academicStatus;
+
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    private Integer scholarshipPercentage;
+
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    private Boolean active;
 }

@@ -5,6 +5,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import studentManagement.domain.StudentDomain;
 import studentManagement.dto.StudentDTO;
+import studentManagement.exception.DuplicateEmailException;
 import studentManagement.exception.StudentNotFoundException;
 import studentManagement.repo.StudentRepo;
 import studentManagement.transformer.StudentTransformer;
@@ -22,7 +23,20 @@ public class StudentServiceImpl implements StudentService {
 
     @Override
     public StudentDTO saveStudent(StudentDTO studentDTO){
+        boolean emailExists = studentRepo.existsByEmailIgnoreCase(studentDTO.getEmail());
+        if (emailExists) {
+            throw new DuplicateEmailException(
+                    "Student with this email already exists"
+            );
+        }
        StudentDomain domain = studentTransformer.toStudentDomain(studentDTO);
+        domain.setAcademicStatus(calculateAcademicStatus(domain.getCgpa()));
+
+        domain.setScholarshipPercentage(
+                calculateScholarship(domain.getCgpa())
+        );
+
+        domain.setActive(true);
         return  studentTransformer.toStudentDTO(studentRepo.save(domain));
     }
 
@@ -30,7 +44,7 @@ public class StudentServiceImpl implements StudentService {
     public Page<StudentDTO> getAllStudent(int page, int size) {
 
         Pageable pageable = PageRequest.of(page, size);
-        Page<StudentDomain> students = studentRepo.findAll(pageable);
+        Page<StudentDomain> students = studentRepo.findByActiveTrue(pageable);
         return students.map(studentTransformer::toStudentDTO);
     }
 
@@ -43,7 +57,7 @@ public class StudentServiceImpl implements StudentService {
                                 "Student not found with ID: " + id
                         )
                 );
-
+        student.setActive(false);
         studentRepo.delete(student);
     }
     @Override
@@ -70,6 +84,14 @@ public class StudentServiceImpl implements StudentService {
         existingStudent.setSemester(studentDTO.getSemester());
         existingStudent.setCgpa(studentDTO.getCgpa());
 
+        existingStudent.setAcademicStatus(
+                calculateAcademicStatus(studentDTO.getCgpa())
+        );
+
+        existingStudent.setScholarshipPercentage(
+                calculateScholarship(studentDTO.getCgpa())
+        );
+
         StudentDomain updatedStudent = studentRepo.save(existingStudent);
 
         return studentTransformer.toStudentDTO(updatedStudent);
@@ -78,7 +100,7 @@ public class StudentServiceImpl implements StudentService {
     @Override
     public List<StudentDTO> getStudentByCourse(String course) {
 
-        List<StudentDomain> students = studentRepo.findByCourseIgnoreCase(course);
+        List<StudentDomain> students = studentRepo.findByCourseIgnoreCaseAndActiveTrue(course);
 
         return students.stream()
                 .map(studentTransformer::toStudentDTO)
@@ -87,7 +109,7 @@ public class StudentServiceImpl implements StudentService {
     @Override
     public List<StudentDTO> getStudentByCgpa(double cgpa) {
 
-        List<StudentDomain> students = studentRepo.findByCgpa(cgpa);
+        List<StudentDomain> students = studentRepo.findByCgpaAndActiveTrue(cgpa);
 
         return students.stream()
                 .map(studentTransformer::toStudentDTO)
@@ -95,10 +117,40 @@ public class StudentServiceImpl implements StudentService {
     }
     @Override
     public List<StudentDTO> findAllByOrderByCgpaDesc(){
-        List<StudentDomain> students = studentRepo.findAllByOrderByCgpaDesc();
+        List<StudentDomain> students = studentRepo.findByActiveTrueOrderByCgpaDesc();
 
         return students.stream()
                 .map(studentTransformer::toStudentDTO)
                 .toList();
+    }
+    private String calculateAcademicStatus(double cgpa) {
+
+        if (cgpa >= 3.5) {
+            return "EXCELLENT";
+
+        } else if (cgpa >= 3.0) {
+            return "GOOD";
+
+        } else if (cgpa >= 2.0) {
+            return "AVERAGE";
+
+        } else {
+            return "AT_RISK";
+        }
+    }
+    private int calculateScholarship(double cgpa) {
+
+        if (cgpa >= 3.8) {
+            return 50;
+
+        } else if (cgpa >= 3.5) {
+            return 25;
+
+        } else if (cgpa >= 3.0) {
+            return 10;
+
+        } else {
+            return 0;
+        }
     }
 }
