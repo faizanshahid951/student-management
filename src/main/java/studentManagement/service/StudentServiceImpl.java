@@ -29,6 +29,7 @@ public class StudentServiceImpl implements StudentService {
                     "Student with this email already exists"
             );
         }
+        checkCourseCapacity(studentDTO.getCourse());
        StudentDomain domain = studentTransformer.toStudentDomain(studentDTO);
         domain.setAcademicStatus(calculateAcademicStatus(domain.getCgpa()));
 
@@ -55,8 +56,7 @@ public class StudentServiceImpl implements StudentService {
                 .orElseThrow(() ->
                         new StudentNotFoundException(
                                 "Student not found with ID: " + id
-                        )
-                );
+                        ));
         student.setActive(false);
         studentRepo.delete(student);
     }
@@ -151,6 +151,25 @@ public class StudentServiceImpl implements StudentService {
 
         } else {
             return 0;
+        }
+    }
+    private void checkCourseCapacity(String course){
+        int currentStudents = studentRepo.countByCourseIgnoreCaseAndActiveTrue(course);
+
+        int capacity;
+
+        if (course.equalsIgnoreCase("computer Science")){
+            capacity =100;
+        } else if (course.equalsIgnoreCase("math")) {
+            capacity=80;
+        } else if (course.equalsIgnoreCase("se")) {
+            capacity=60;
+        }else {
+            throw new RuntimeException("invalid course" + course);
+        }
+        if(currentStudents >= capacity){
+            throw new RuntimeException("course capacity exceeded for " + course);
+
         }
     }
 }

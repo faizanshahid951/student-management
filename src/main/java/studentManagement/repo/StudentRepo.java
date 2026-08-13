@@ -18,4 +18,6 @@ public interface StudentRepo extends MongoRepository<StudentDomain, String> {
     List<StudentDomain> findByActiveTrueOrderByCgpaDesc();
 
     boolean existsByEmailIgnoreCase(String email);
+
+    int countByCourseIgnoreCaseAndActiveTrue(String course);
 }
