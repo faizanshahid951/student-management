@@ -8,6 +8,7 @@ import studentManagement.dto.StudentDTO;
 import studentManagement.exception.DuplicateEmailException;
 import studentManagement.exception.StudentNotFoundException;
 import studentManagement.repo.StudentRepo;
+import studentManagement.repo.StudentSearchRepo;
 import studentManagement.transformer.StudentTransformer;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -20,6 +21,7 @@ public class StudentServiceImpl implements StudentService {
 
     private final StudentRepo studentRepo;
     private final StudentTransformer studentTransformer;
+    private final StudentSearchRepo studentSearchRepo;
 
     @Override
     public StudentDTO saveStudent(StudentDTO studentDTO){
@@ -36,16 +38,32 @@ public class StudentServiceImpl implements StudentService {
         domain.setScholarshipPercentage(
                 calculateScholarship(domain.getCgpa())
         );
+        domain.setAcademicProbation(
+                calculateAcademicProbation(domain.getCgpa())
+        );
+        domain.setRequestAdvisor(calculateRequiresAdvisor(domain.getCgpa()));
 
         domain.setActive(true);
         return  studentTransformer.toStudentDTO(studentRepo.save(domain));
     }
 
     @Override
-    public Page<StudentDTO> getAllStudent(int page, int size) {
+    public Page<StudentDTO> getAllStudent(
+            String course,
+            Double minCgpa,
+            Double maxCgpa,
+            Integer semester,
+            int page,
+            int size) {
 
-        Pageable pageable = PageRequest.of(page, size);
-        Page<StudentDomain> students = studentRepo.findByActiveTrue(pageable);
+        Page<StudentDomain> students = studentSearchRepo.searchStudents(
+                        course,
+                        minCgpa,
+                        maxCgpa,
+                        semester,
+                        page,
+                        size);
+
         return students.map(studentTransformer::toStudentDTO);
     }
 
@@ -88,9 +106,15 @@ public class StudentServiceImpl implements StudentService {
                 calculateAcademicStatus(studentDTO.getCgpa())
         );
 
-        existingStudent.setScholarshipPercentage(
-                calculateScholarship(studentDTO.getCgpa())
-        );
+        existingStudent.setScholarshipPercentage(calculateScholarship(studentDTO.getCgpa()));
+
+        validateSemesterProgression(existingStudent, studentDTO.getSemester());
+
+        existingStudent.setSemester(studentDTO.getSemester());
+
+        existingStudent.setAcademicProbation(calculateAcademicProbation(studentDTO.getCgpa()));
+
+        existingStudent.setRequestAdvisor(calculateRequiresAdvisor(studentDTO.getCgpa()));
 
         StudentDomain updatedStudent = studentRepo.save(existingStudent);
 
@@ -171,5 +195,45 @@ public class StudentServiceImpl implements StudentService {
             throw new RuntimeException("course capacity exceeded for " + course);
 
         }
+    }
+    private boolean calculateAcademicProbation(double cgpa) {
+
+        return cgpa < 2.0;
+    }
+    private void validateSemesterProgression(
+            StudentDomain student,
+            int newSemester) {
+
+        int currentSemester = student.getSemester();
+
+        if (newSemester < 1 || newSemester > 8) {
+            throw new RuntimeException(
+                    "Semester must be between 1 and 8"
+            );
+        }
+
+        if (newSemester < currentSemester) {
+            throw new RuntimeException(
+                    "Student cannot move to a previous semester"
+            );
+        }
+
+        if (newSemester > currentSemester + 1) {
+            throw new RuntimeException(
+                    "Student cannot skip semesters"
+            );
+        }
+
+        if (newSemester == currentSemester + 1
+                && student.getCgpa() < 2.0) {
+
+            throw new RuntimeException(
+                    "CGPA must be at least 2.0 to progress"
+            );
+        }
+    }
+    private boolean calculateRequiresAdvisor(double cgpa) {
+
+        return cgpa < 2.0;
     }
 }

@@ -43,5 +43,11 @@ public class StudentDTO {
     private Integer scholarshipPercentage;
 
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    private Boolean academicProbation;
+
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    private Boolean requestAdvisor;
+
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private Boolean active;
 }

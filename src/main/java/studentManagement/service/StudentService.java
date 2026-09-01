@@ -9,7 +9,14 @@ public interface StudentService {
 
     StudentDTO saveStudent(StudentDTO studentDTO);
 
-    Page<StudentDTO> getAllStudent(int page, int size);
+    Page<StudentDTO> getAllStudent(
+            String course,
+            Double minCgpa,
+            Double maxCgpa,
+            Integer semester,
+            int page,
+            int size
+    );
 
     void deleteStudent(String id);
 

@@ -19,10 +19,22 @@ public class StudentController {
 
     @GetMapping
     public ResponseEntity<Page<StudentDTO>> getAllStudent(
+
+            @RequestParam(required = false) String course,
+            @RequestParam(required = false) Double minCgpa,
+            @RequestParam(required = false) Double maxCgpa,
+            @RequestParam(required = false) Integer semester,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
 
-        return ResponseEntity.ok(studentService.getAllStudent(page, size));
+        return ResponseEntity.ok(
+                studentService.getAllStudent(
+                        course,
+                        minCgpa,
+                        maxCgpa,
+                        semester,
+                        page,
+                        size));
     }
 
     @PostMapping

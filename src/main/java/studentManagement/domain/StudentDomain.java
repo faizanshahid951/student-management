@@ -23,6 +23,8 @@ public class StudentDomain {
     private double cgpa;
     private String academicStatus;
     private int scholarshipPercentage;
+    private boolean academicProbation;
+    private boolean requestAdvisor;
     private boolean active;
 
 }

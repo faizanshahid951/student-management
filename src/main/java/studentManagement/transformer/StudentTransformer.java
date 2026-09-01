@@ -34,6 +34,8 @@ public class StudentTransformer {
                 .cgpa(studentDomain.getCgpa())
                 .academicStatus(studentDomain.getAcademicStatus())
                 .scholarshipPercentage(studentDomain.getScholarshipPercentage())
+                .academicProbation(studentDomain.isAcademicProbation())
+                .requestAdvisor(studentDomain.isRequestAdvisor())
                 .active(studentDomain.isActive())
                 .build();
     }
