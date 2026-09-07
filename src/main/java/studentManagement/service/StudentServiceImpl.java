@@ -1,15 +1,10 @@
 package studentManagement.service;
 
-import jakarta.validation.constraints.DecimalMax;
-import jakarta.validation.constraints.DecimalMin;
-import jakarta.validation.constraints.NotNull;
+
 import org.springframework.data.domain.Page;
 import studentManagement.domain.StudentDomain;
-import studentManagement.dto.CourseStatisticsDTO;
-import studentManagement.dto.StudentDTO;
-import studentManagement.dto.StudentStatisticsDTO;
-import studentManagement.exception.DuplicateEmailException;
-import studentManagement.exception.StudentNotFoundException;
+import studentManagement.dto.*;
+import studentManagement.exception.*;
 import studentManagement.repo.CourseStatisticsRepo;
 import studentManagement.repo.StudentRepo;
 import studentManagement.repo.StudentSearchRepo;
@@ -31,7 +26,7 @@ public class StudentServiceImpl implements StudentService {
     private final CourseStatisticsRepo courseStatisticsRepo;
 
     @Override
-    public StudentDTO saveStudent(StudentDTO studentDTO){
+    public StudentResponseDTO saveStudent(StudentCreateDTO studentDTO){
         boolean emailExists = studentRepo.existsByEmailIgnoreCase(studentDTO.getEmail());
         if (emailExists) {
             throw new DuplicateEmailException(
@@ -55,7 +50,7 @@ public class StudentServiceImpl implements StudentService {
     }
 
     @Override
-    public Page<StudentDTO> getAllStudent(
+    public Page<StudentResponseDTO> getAllStudent(
             String course,
             Double minCgpa,
             Double maxCgpa,
@@ -86,7 +81,7 @@ public class StudentServiceImpl implements StudentService {
         studentRepo.save(student);
     }
     @Override
-    public StudentDTO getStudentById(String id) {
+    public StudentResponseDTO getStudentById(String id) {
 
         StudentDomain student = studentRepo.findById(id)
                 .orElseThrow(() -> new StudentNotFoundException(
@@ -96,7 +91,7 @@ public class StudentServiceImpl implements StudentService {
         return studentTransformer.toStudentDTO(student);
     }
     @Override
-    public StudentDTO updateStudent(String id, StudentDTO studentDTO) {
+    public StudentResponseDTO updateStudent(String id, StudentUpdateDTO studentDTO) {
 
         StudentDomain existingStudent = studentRepo.findById(id)
                 .orElseThrow(() -> new StudentNotFoundException(
@@ -128,8 +123,7 @@ public class StudentServiceImpl implements StudentService {
             validateSemesterProgression(
                     existingStudent,
                     studentDTO.getSemester(),
-                    studentDTO.getCgpa()
-            );
+                    studentDTO.getCgpa());
         }
 
         // CGPA changed
@@ -170,7 +164,7 @@ public class StudentServiceImpl implements StudentService {
 
 
     @Override
-    public List<StudentDTO> getStudentByCourse(String course) {
+    public List<StudentResponseDTO> getStudentByCourse(String course) {
 
         List<StudentDomain> students = studentRepo.findByCourseIgnoreCaseAndActiveTrue(course);
 
@@ -179,7 +173,7 @@ public class StudentServiceImpl implements StudentService {
                 .toList();
     }
     @Override
-    public List<StudentDTO> getStudentByCgpa(double cgpa) {
+    public List<StudentResponseDTO> getStudentByCgpa(double cgpa) {
 
         List<StudentDomain> students = studentRepo.findByCgpaAndActiveTrue(cgpa);
 
@@ -188,7 +182,7 @@ public class StudentServiceImpl implements StudentService {
                 .toList();
     }
     @Override
-    public List<StudentDTO> findAllByOrderByCgpaDesc(){
+    public List<StudentResponseDTO> findAllByOrderByCgpaDesc(){
         List<StudentDomain> students = studentRepo.findByActiveTrueOrderByCgpaDesc();
 
         return students.stream()
@@ -248,10 +242,10 @@ public class StudentServiceImpl implements StudentService {
         } else if (course.equalsIgnoreCase("se")) {
             capacity=60;
         }else {
-            throw new RuntimeException("invalid course" + course);
+            throw new InvalidCourseException("invalid course" + course);
         }
         if(currentStudents >= capacity){
-            throw new RuntimeException("course capacity exceeded for " + course);
+            throw new CourseCapacityExceededException("course capacity exceeded for " + course);
 
         }
     }
@@ -267,28 +261,24 @@ public class StudentServiceImpl implements StudentService {
 
         if (newSemester < 1 || newSemester > 8) {
             throw new RuntimeException(
-                    "Semester must be between 1 and 8"
-            );
+                    "Semester must be between 1 and 8");
         }
 
         if (newSemester < currentSemester) {
             throw new RuntimeException(
-                    "Student cannot move to a previous semester"
-            );
+                    "Student cannot move to a previous semester");
         }
 
         if (newSemester > currentSemester + 1) {
-            throw new RuntimeException(
-                    "Student cannot skip semesters"
-            );
+            throw new InvalidSemesterProgressionException(
+                    "Student cannot skip semesters");
         }
 
         if (newSemester == currentSemester + 1
-                && student.getCgpa() < 2.0) {
+                && cgpa < 2.0) {
 
             throw new RuntimeException(
-                    "CGPA must be at least 2.0 to progress"
-            );
+                    "CGPA must be at least 2.0 to progress");
         }
     }
     private boolean calculateRequiresAdvisor(double cgpa) {

@@ -1,9 +1,7 @@
 package studentManagement.controller;
 
 import org.springframework.data.domain.Page;
-import studentManagement.dto.CourseStatisticsDTO;
-import studentManagement.dto.StudentDTO;
-import studentManagement.dto.StudentStatisticsDTO;
+import studentManagement.dto.*;
 import studentManagement.service.StudentService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
@@ -20,7 +18,7 @@ public class StudentController {
     private final StudentService studentService;
 
     @GetMapping
-    public ResponseEntity<Page<StudentDTO>> getAllStudent(
+    public ResponseEntity<Page<StudentResponseDTO>> getAllStudent(
 
             @RequestParam(required = false) String course,
             @RequestParam(required = false) Double minCgpa,
@@ -40,7 +38,7 @@ public class StudentController {
     }
 
     @PostMapping
-    public StudentDTO createStudent(@Valid @RequestBody StudentDTO studentDTO){
+    public StudentResponseDTO createStudent(@Valid @RequestBody StudentCreateDTO studentDTO){
         return studentService.saveStudent(studentDTO);
     }
 
@@ -51,29 +49,29 @@ public class StudentController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<StudentDTO> getStudentById(@NotBlank @PathVariable String id) {
+    public ResponseEntity<StudentResponseDTO> getStudentById(@NotBlank @PathVariable String id) {
         return ResponseEntity.ok(studentService.getStudentById(id));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<StudentDTO> updateStudent(
+    public ResponseEntity<StudentResponseDTO> updateStudent(
             @PathVariable String id,
-          @Valid @RequestBody StudentDTO studentDTO) {
+          @Valid @RequestBody StudentUpdateDTO studentDTO) {
 
-        StudentDTO updatedStudent = studentService.updateStudent(id, studentDTO);
+        StudentResponseDTO updatedStudent = studentService.updateStudent(id, studentDTO);
 
         return ResponseEntity.ok(updatedStudent);
     }
     @GetMapping("/course/{course}")
-    public ResponseEntity<List<StudentDTO>> getStudentsByCourse(@PathVariable String course) {
+    public ResponseEntity<List<StudentResponseDTO>> getStudentsByCourse(@PathVariable String course) {
         return ResponseEntity.ok(studentService.getStudentByCourse(course));
     }
     @GetMapping("/cgpa/{cgpa}")
-    public ResponseEntity<List<StudentDTO>> getStudentsByCgpa(@PathVariable double cgpa) {
+    public ResponseEntity<List<StudentResponseDTO>> getStudentsByCgpa(@PathVariable double cgpa) {
         return ResponseEntity.ok(studentService.getStudentByCgpa(cgpa));
     }
     @GetMapping("/sorted")
-    public ResponseEntity<List<StudentDTO>> getAllStudentByOrderByCgpaDesc() {
+    public ResponseEntity<List<StudentResponseDTO>> getAllStudentByOrderByCgpaDesc() {
         return ResponseEntity.ok(studentService.findAllByOrderByCgpaDesc());
     }
     @GetMapping("/statistics")

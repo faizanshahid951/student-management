@@ -1,36 +1,33 @@
 package studentManagement.service;
 
 import org.springframework.data.domain.Page;
-import studentManagement.dto.CourseStatisticsDTO;
-import studentManagement.dto.StudentDTO;
-import studentManagement.dto.StudentStatisticsDTO;
+import studentManagement.dto.*;
 
 import java.util.List;
 
 public interface StudentService {
 
-    StudentDTO saveStudent(StudentDTO studentDTO);
+    StudentResponseDTO saveStudent(StudentCreateDTO studentDTO);
 
-    Page<StudentDTO> getAllStudent(
+    Page<StudentResponseDTO> getAllStudent(
             String course,
             Double minCgpa,
             Double maxCgpa,
             Integer semester,
             int page,
-            int size
-    );
+            int size);
 
     void deleteStudent(String id);
 
-    StudentDTO getStudentById(String id);
+    StudentResponseDTO getStudentById(String id);
 
-    StudentDTO updateStudent(String id, StudentDTO studentDTO);
+    StudentResponseDTO updateStudent(String id, StudentUpdateDTO studentDTO);
 
-    List<StudentDTO> getStudentByCourse(String course);
+    List<StudentResponseDTO> getStudentByCourse(String course);
 
-    List<StudentDTO> getStudentByCgpa(double cgpa);
+    List<StudentResponseDTO> getStudentByCgpa(double cgpa);
 
-    List<StudentDTO> findAllByOrderByCgpaDesc();
+    List<StudentResponseDTO> findAllByOrderByCgpaDesc();
 
     StudentStatisticsDTO getStudentStatistics();
 

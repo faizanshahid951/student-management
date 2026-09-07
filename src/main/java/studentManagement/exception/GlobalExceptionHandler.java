@@ -6,33 +6,74 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
-import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
-    // Student database mein na mile
     @ExceptionHandler(StudentNotFoundException.class)
-    public ResponseEntity<ErrorResponse> handleStudentNotFound(
+    public ResponseEntity<String> handleStudentNotFound(
             StudentNotFoundException exception) {
-
-        ErrorResponse errorResponse = new ErrorResponse(
-                LocalDateTime.now(),
-                HttpStatus.NOT_FOUND.value(),
-                "Not Found",
-                exception.getMessage()
-        );
 
         return ResponseEntity
                 .status(HttpStatus.NOT_FOUND)
-                .body(errorResponse);
+                .body(exception.getMessage());
     }
 
-    // @Valid validation fail ho
+
+    @ExceptionHandler(DuplicateEmailException.class)
+    public ResponseEntity<String> handleDuplicateEmail(
+            DuplicateEmailException exception) {
+
+        return ResponseEntity
+                .status(HttpStatus.CONFLICT)
+                .body(exception.getMessage());
+    }
+
+
+    @ExceptionHandler(CourseCapacityExceededException.class)
+    public ResponseEntity<String> handleCourseCapacity(
+            CourseCapacityExceededException exception) {
+
+        return ResponseEntity
+                .status(HttpStatus.CONFLICT)
+                .body(exception.getMessage());
+    }
+
+
+    @ExceptionHandler(InvalidCourseException.class)
+    public ResponseEntity<String> handleInvalidCourse(
+            InvalidCourseException exception) {
+
+        return ResponseEntity
+                .badRequest()
+                .body(exception.getMessage());
+    }
+
+
+    @ExceptionHandler(InvalidSemesterException.class)
+    public ResponseEntity<String> handleInvalidSemester(
+            InvalidSemesterException exception) {
+
+        return ResponseEntity
+                .badRequest()
+                .body(exception.getMessage());
+    }
+
+
+    @ExceptionHandler(InvalidSemesterProgressionException.class)
+    public ResponseEntity<String> handleSemesterProgression(
+            InvalidSemesterProgressionException exception) {
+
+        return ResponseEntity
+                .badRequest()
+                .body(exception.getMessage());
+    }
+
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<Map<String, String>> handleValidationErrors(
+    public ResponseEntity<Map<String, String>> handleValidation(
             MethodArgumentNotValidException exception) {
 
         Map<String, String> errors = new HashMap<>();
@@ -47,32 +88,17 @@ public class GlobalExceptionHandler {
                 );
 
         return ResponseEntity
-                .status(HttpStatus.BAD_REQUEST)
+                .badRequest()
                 .body(errors);
     }
 
-    // Koi aur unexpected exception aaye
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorResponse> handleGeneralException(
-            Exception exception) {
 
-        ErrorResponse errorResponse = new ErrorResponse(
-                LocalDateTime.now(),
-                HttpStatus.INTERNAL_SERVER_ERROR.value(),
-                "Internal Server Error",
-                exception.getMessage()
-        );
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<String> handleGeneralException(
+            Exception exception) {
 
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(errorResponse);
-    }
-    @ExceptionHandler(DuplicateEmailException.class)
-    public ResponseEntity<String> handleDuplicateEmail(
-            DuplicateEmailException exception) {
-
-        return ResponseEntity
-                .status(HttpStatus.CONFLICT)
-                .body(exception.getMessage());
+                .body("Something went wrong");
     }
 }

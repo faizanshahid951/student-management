@@ -1,16 +1,16 @@
 package studentManagement.transformer;
 
 import studentManagement.domain.StudentDomain;
-import studentManagement.dto.StudentDTO;
+import studentManagement.dto.StudentCreateDTO;
 import lombok.Builder;
 import org.springframework.stereotype.Component;
+import studentManagement.dto.StudentResponseDTO;
 
 @Component
 @Builder
 public class StudentTransformer {
-    public StudentDomain toStudentDomain(StudentDTO studentDTO){
+    public StudentDomain toStudentDomain(StudentCreateDTO studentDTO){
         return StudentDomain.builder()
-                .id(studentDTO.getId())
                 .firstname(studentDTO.getFirstname())
                 .lastname(studentDTO.getLastname())
                 .email(studentDTO.getEmail())
@@ -22,8 +22,8 @@ public class StudentTransformer {
     }
 
 
-    public StudentDTO toStudentDTO(StudentDomain studentDomain){
-        return StudentDTO.builder()
+    public StudentResponseDTO toStudentDTO(StudentDomain studentDomain){
+        return StudentResponseDTO.builder()
                 .id(studentDomain.getId())
                 .firstname(studentDomain.getFirstname())
                 .lastname(studentDomain.getLastname())
