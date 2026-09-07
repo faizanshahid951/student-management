@@ -20,4 +20,6 @@ public interface StudentRepo extends MongoRepository<StudentDomain, String> {
     boolean existsByEmailIgnoreCase(String email);
 
     int countByCourseIgnoreCaseAndActiveTrue(String course);
+
+    boolean existsByEmailIgnoreCaseAndIdNot(String email, String id);
 }

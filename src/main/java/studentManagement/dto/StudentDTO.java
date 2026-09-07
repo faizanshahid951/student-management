@@ -15,21 +15,23 @@ public class StudentDTO {
 
     @NotBlank(message = "First name is required")
     private String firstname;
-    @NotBlank
+    @NotBlank(message = "Last name is required")
     private String lastname;
     @NotBlank(message = "email is required")
     @Email
     private String email;
 
     @NotNull(message = "Age is required")
-    @Min(17)
+    @Min(value = 17, message = "Age must be at least 17")
     @Max(value = 40, message = "Age must not be greater than 40")
-    private int age;
+    private Integer age;
 
     @NotBlank(message = "Course is required")
     private String course;
-    @NotNull
-    private int semester;
+    @NotNull(message = "Semester is required")
+    @Min(value = 1, message = "Semester must be at least 1")
+    @Max(value = 8, message = "Semester must not be greater than 8")
+    private Integer semester;
 
     @NotNull(message = "CGPA is required")
     @DecimalMin(value = "0.0", message = "CGPA cannot be below 0")

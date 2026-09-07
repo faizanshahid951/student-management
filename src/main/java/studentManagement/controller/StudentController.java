@@ -1,7 +1,9 @@
 package studentManagement.controller;
 
 import org.springframework.data.domain.Page;
+import studentManagement.dto.CourseStatisticsDTO;
 import studentManagement.dto.StudentDTO;
+import studentManagement.dto.StudentStatisticsDTO;
 import studentManagement.service.StudentService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
@@ -73,5 +75,14 @@ public class StudentController {
     @GetMapping("/sorted")
     public ResponseEntity<List<StudentDTO>> getAllStudentByOrderByCgpaDesc() {
         return ResponseEntity.ok(studentService.findAllByOrderByCgpaDesc());
+    }
+    @GetMapping("/statistics")
+    public ResponseEntity<StudentStatisticsDTO> getStudentStatistics(){
+        return ResponseEntity.ok(studentService.getStudentStatistics());
+    }
+    @GetMapping("/statistics/course")
+    public ResponseEntity<List<CourseStatisticsDTO>> getCourseStatistics() {
+
+        return ResponseEntity.ok(studentService.getCourseStatistics());
     }
 }

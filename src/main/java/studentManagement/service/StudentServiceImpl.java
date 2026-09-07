@@ -1,14 +1,19 @@
 package studentManagement.service;
 
+import jakarta.validation.constraints.DecimalMax;
+import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.NotNull;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import studentManagement.domain.StudentDomain;
+import studentManagement.dto.CourseStatisticsDTO;
 import studentManagement.dto.StudentDTO;
+import studentManagement.dto.StudentStatisticsDTO;
 import studentManagement.exception.DuplicateEmailException;
 import studentManagement.exception.StudentNotFoundException;
+import studentManagement.repo.CourseStatisticsRepo;
 import studentManagement.repo.StudentRepo;
 import studentManagement.repo.StudentSearchRepo;
+import studentManagement.repo.StudentStatisticsRepo;
 import studentManagement.transformer.StudentTransformer;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -22,6 +27,8 @@ public class StudentServiceImpl implements StudentService {
     private final StudentRepo studentRepo;
     private final StudentTransformer studentTransformer;
     private final StudentSearchRepo studentSearchRepo;
+    private final StudentStatisticsRepo studentStatisticsRepo;
+    private final CourseStatisticsRepo courseStatisticsRepo;
 
     @Override
     public StudentDTO saveStudent(StudentDTO studentDTO){
@@ -76,7 +83,7 @@ public class StudentServiceImpl implements StudentService {
                                 "Student not found with ID: " + id
                         ));
         student.setActive(false);
-        studentRepo.delete(student);
+        studentRepo.save(student);
     }
     @Override
     public StudentDTO getStudentById(String id) {
@@ -92,34 +99,75 @@ public class StudentServiceImpl implements StudentService {
     public StudentDTO updateStudent(String id, StudentDTO studentDTO) {
 
         StudentDomain existingStudent = studentRepo.findById(id)
-          .orElseThrow(() -> new StudentNotFoundException(
-                  "Student not found with ID: " + id));
+                .orElseThrow(() -> new StudentNotFoundException(
+                        "Student not found with ID: " + id));
 
+        // Email changed
+        if (!existingStudent.getEmail()
+                .equalsIgnoreCase(studentDTO.getEmail())) {
+
+            if (studentRepo.existsByEmailIgnoreCaseAndIdNot(
+                    studentDTO.getEmail(), id)) {
+
+                throw new DuplicateEmailException(
+                        "Email already in use");
+            }
+        }
+
+        // Course changed
+        if (!existingStudent.getCourse()
+                .equalsIgnoreCase(studentDTO.getCourse())) {
+
+            checkCourseCapacity(studentDTO.getCourse());
+        }
+
+        // Semester changed
+        if (existingStudent.getSemester()
+                != studentDTO.getSemester()) {
+
+            validateSemesterProgression(
+                    existingStudent,
+                    studentDTO.getSemester(),
+                    studentDTO.getCgpa()
+            );
+        }
+
+        // CGPA changed
+        if (existingStudent.getCgpa()
+                != studentDTO.getCgpa()) {
+
+            existingStudent.setAcademicStatus(
+                    calculateAcademicStatus(studentDTO.getCgpa())
+            );
+
+            existingStudent.setScholarshipPercentage(
+                    calculateScholarship(studentDTO.getCgpa())
+            );
+
+            existingStudent.setAcademicProbation(
+                    calculateAcademicProbation(studentDTO.getCgpa())
+            );
+
+            existingStudent.setRequestAdvisor(
+                    calculateRequiresAdvisor(studentDTO.getCgpa())
+            );
+        }
+
+        // Update fields
         existingStudent.setFirstname(studentDTO.getFirstname());
         existingStudent.setLastname(studentDTO.getLastname());
+        existingStudent.setEmail(studentDTO.getEmail());
         existingStudent.setAge(studentDTO.getAge());
         existingStudent.setCourse(studentDTO.getCourse());
         existingStudent.setSemester(studentDTO.getSemester());
         existingStudent.setCgpa(studentDTO.getCgpa());
 
-        existingStudent.setAcademicStatus(
-                calculateAcademicStatus(studentDTO.getCgpa())
-        );
-
-        existingStudent.setScholarshipPercentage(calculateScholarship(studentDTO.getCgpa()));
-
-        validateSemesterProgression(existingStudent, studentDTO.getSemester());
-
-        existingStudent.setSemester(studentDTO.getSemester());
-
-        existingStudent.setAcademicProbation(calculateAcademicProbation(studentDTO.getCgpa()));
-
-        existingStudent.setRequestAdvisor(calculateRequiresAdvisor(studentDTO.getCgpa()));
-
-        StudentDomain updatedStudent = studentRepo.save(existingStudent);
+        StudentDomain updatedStudent =
+                studentRepo.save(existingStudent);
 
         return studentTransformer.toStudentDTO(updatedStudent);
     }
+
 
     @Override
     public List<StudentDTO> getStudentByCourse(String course) {
@@ -147,6 +195,17 @@ public class StudentServiceImpl implements StudentService {
                 .map(studentTransformer::toStudentDTO)
                 .toList();
     }
+
+    @Override
+    public StudentStatisticsDTO getStudentStatistics() {
+        return studentStatisticsRepo.getStatistics();
+    }
+    @Override
+    public List<CourseStatisticsDTO> getCourseStatistics() {
+
+        return courseStatisticsRepo.getCourseStatistics();
+    }
+
     private String calculateAcademicStatus(double cgpa) {
 
         if (cgpa >= 3.5) {
@@ -202,7 +261,7 @@ public class StudentServiceImpl implements StudentService {
     }
     private void validateSemesterProgression(
             StudentDomain student,
-            int newSemester) {
+            int newSemester, Double cgpa) {
 
         int currentSemester = student.getSemester();
 

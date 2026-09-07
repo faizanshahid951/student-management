@@ -1,8 +1,10 @@
 package studentManagement.service;
 
 import org.springframework.data.domain.Page;
-import studentManagement.domain.StudentDomain;
+import studentManagement.dto.CourseStatisticsDTO;
 import studentManagement.dto.StudentDTO;
+import studentManagement.dto.StudentStatisticsDTO;
+
 import java.util.List;
 
 public interface StudentService {
@@ -29,4 +31,8 @@ public interface StudentService {
     List<StudentDTO> getStudentByCgpa(double cgpa);
 
     List<StudentDTO> findAllByOrderByCgpaDesc();
+
+    StudentStatisticsDTO getStudentStatistics();
+
+    List<CourseStatisticsDTO> getCourseStatistics();
 }
