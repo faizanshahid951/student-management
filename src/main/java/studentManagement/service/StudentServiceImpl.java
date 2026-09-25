@@ -1,7 +1,9 @@
 package studentManagement.service;
 
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.stereotype.Service;
 import studentManagement.domain.StudentDomain;
 import studentManagement.dto.*;
 import studentManagement.exception.*;
@@ -10,8 +12,6 @@ import studentManagement.repo.StudentRepo;
 import studentManagement.repo.StudentSearchRepo;
 import studentManagement.repo.StudentStatisticsRepo;
 import studentManagement.transformer.StudentTransformer;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
 
 import java.util.List;
 
@@ -26,27 +26,21 @@ public class StudentServiceImpl implements StudentService {
     private final CourseStatisticsRepo courseStatisticsRepo;
 
     @Override
-    public StudentResponseDTO saveStudent(StudentCreateDTO studentDTO){
+    public StudentResponseDTO saveStudent(StudentCreateDTO studentDTO) {
         boolean emailExists = studentRepo.existsByEmailIgnoreCase(studentDTO.getEmail());
         if (emailExists) {
-            throw new DuplicateEmailException(
-                    "Student with this email already exists"
-            );
+            throw new DuplicateEmailException("Student with this email already exists");
         }
         checkCourseCapacity(studentDTO.getCourse());
-       StudentDomain domain = studentTransformer.toStudentDomain(studentDTO);
+        StudentDomain domain = studentTransformer.toStudentDomain(studentDTO);
         domain.setAcademicStatus(calculateAcademicStatus(domain.getCgpa()));
 
-        domain.setScholarshipPercentage(
-                calculateScholarship(domain.getCgpa())
-        );
-        domain.setAcademicProbation(
-                calculateAcademicProbation(domain.getCgpa())
-        );
+        domain.setScholarshipPercentage(calculateScholarship(domain.getCgpa()));
+        domain.setAcademicProbation(calculateAcademicProbation(domain.getCgpa()));
         domain.setRequestAdvisor(calculateRequiresAdvisor(domain.getCgpa()));
 
         domain.setActive(true);
-        return  studentTransformer.toStudentDTO(studentRepo.save(domain));
+        return studentTransformer.toStudentDTO(studentRepo.save(domain));
     }
 
     @Override
@@ -59,12 +53,12 @@ public class StudentServiceImpl implements StudentService {
             int size) {
 
         Page<StudentDomain> students = studentSearchRepo.searchStudents(
-                        course,
-                        minCgpa,
-                        maxCgpa,
-                        semester,
-                        page,
-                        size);
+                course,
+                minCgpa,
+                maxCgpa,
+                semester,
+                page,
+                size);
 
         return students.map(studentTransformer::toStudentDTO);
     }
@@ -80,6 +74,7 @@ public class StudentServiceImpl implements StudentService {
         student.setActive(false);
         studentRepo.save(student);
     }
+
     @Override
     public StudentResponseDTO getStudentById(String id) {
 
@@ -90,6 +85,7 @@ public class StudentServiceImpl implements StudentService {
 
         return studentTransformer.toStudentDTO(student);
     }
+
     @Override
     public StudentResponseDTO updateStudent(String id, StudentUpdateDTO studentDTO) {
 
@@ -172,6 +168,7 @@ public class StudentServiceImpl implements StudentService {
                 .map(studentTransformer::toStudentDTO)
                 .toList();
     }
+
     @Override
     public List<StudentResponseDTO> getStudentByCgpa(double cgpa) {
 
@@ -181,8 +178,9 @@ public class StudentServiceImpl implements StudentService {
                 .map(studentTransformer::toStudentDTO)
                 .toList();
     }
+
     @Override
-    public List<StudentResponseDTO> findAllByOrderByCgpaDesc(){
+    public List<StudentResponseDTO> findAllByOrderByCgpaDesc() {
         List<StudentDomain> students = studentRepo.findByActiveTrueOrderByCgpaDesc();
 
         return students.stream()
@@ -194,6 +192,7 @@ public class StudentServiceImpl implements StudentService {
     public StudentStatisticsDTO getStudentStatistics() {
         return studentStatisticsRepo.getStatistics();
     }
+
     @Override
     public List<CourseStatisticsDTO> getCourseStatistics() {
 
@@ -215,6 +214,7 @@ public class StudentServiceImpl implements StudentService {
             return "AT_RISK";
         }
     }
+
     private int calculateScholarship(double cgpa) {
 
         if (cgpa >= 3.8) {
@@ -230,29 +230,32 @@ public class StudentServiceImpl implements StudentService {
             return 0;
         }
     }
-    private void checkCourseCapacity(String course){
+
+    private void checkCourseCapacity(String course) {
         int currentStudents = studentRepo.countByCourseIgnoreCaseAndActiveTrue(course);
 
         int capacity;
 
-        if (course.equalsIgnoreCase("computer Science")){
-            capacity =100;
+        if (course.equalsIgnoreCase("computer Science")) {
+            capacity = 100;
         } else if (course.equalsIgnoreCase("math")) {
-            capacity=80;
+            capacity = 80;
         } else if (course.equalsIgnoreCase("se")) {
-            capacity=60;
-        }else {
+            capacity = 60;
+        } else {
             throw new InvalidCourseException("invalid course" + course);
         }
-        if(currentStudents >= capacity){
+        if (currentStudents >= capacity) {
             throw new CourseCapacityExceededException("course capacity exceeded for " + course);
 
         }
     }
+
     private boolean calculateAcademicProbation(double cgpa) {
 
         return cgpa < 2.0;
     }
+
     private void validateSemesterProgression(
             StudentDomain student,
             int newSemester, Double cgpa) {
@@ -281,6 +284,7 @@ public class StudentServiceImpl implements StudentService {
                     "CGPA must be at least 2.0 to progress");
         }
     }
+
     private boolean calculateRequiresAdvisor(double cgpa) {
 
         return cgpa < 2.0;

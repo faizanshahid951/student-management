@@ -24,6 +24,7 @@ public class StudentSearchRepo {
             int page,
             int size) {
 
+        //Criteria builder move
         Query query = new Query();
 
         // Sirf active students
