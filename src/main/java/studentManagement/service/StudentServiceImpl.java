@@ -11,6 +11,7 @@ import studentManagement.repo.CourseStatisticsRepo;
 import studentManagement.repo.StudentRepo;
 import studentManagement.repo.StudentSearchRepo;
 import studentManagement.repo.StudentStatisticsRepo;
+import studentManagement.strategy.scholarship.ScholarshipContext;
 import studentManagement.transformer.StudentTransformer;
 
 import java.util.List;
@@ -24,6 +25,7 @@ public class StudentServiceImpl implements StudentService {
     private final StudentSearchRepo studentSearchRepo;
     private final StudentStatisticsRepo studentStatisticsRepo;
     private final CourseStatisticsRepo courseStatisticsRepo;
+    private final ScholarshipContext scholarshipContext;
 
     @Override
     public StudentResponseDTO saveStudent(StudentCreateDTO studentDTO) {
@@ -35,7 +37,8 @@ public class StudentServiceImpl implements StudentService {
         StudentDomain domain = studentTransformer.toStudentDomain(studentDTO);
         domain.setAcademicStatus(calculateAcademicStatus(domain.getCgpa()));
 
-        domain.setScholarshipPercentage(calculateScholarship(domain.getCgpa()));
+//        domain.setScholarshipPercentage(calculateScholarship(domain.getCgpa()));
+        domain.setScholarshipPercentage(scholarshipContext.calculate(domain.getCgpa()));
         domain.setAcademicProbation(calculateAcademicProbation(domain.getCgpa()));
         domain.setRequestAdvisor(calculateRequiresAdvisor(domain.getCgpa()));
 
@@ -131,7 +134,7 @@ public class StudentServiceImpl implements StudentService {
             );
 
             existingStudent.setScholarshipPercentage(
-                    calculateScholarship(studentDTO.getCgpa())
+                    scholarshipContext.calculate(studentDTO.getCgpa())
             );
 
             existingStudent.setAcademicProbation(
@@ -198,7 +201,7 @@ public class StudentServiceImpl implements StudentService {
 
         return courseStatisticsRepo.getCourseStatistics();
     }
-
+// hash map ---->
     private String calculateAcademicStatus(double cgpa) {
 
         if (cgpa >= 3.5) {
@@ -215,21 +218,21 @@ public class StudentServiceImpl implements StudentService {
         }
     }
 
-    private int calculateScholarship(double cgpa) {
-
-        if (cgpa >= 3.8) {
-            return 50;
-
-        } else if (cgpa >= 3.5) {
-            return 25;
-
-        } else if (cgpa >= 3.0) {
-            return 10;
-
-        } else {
-            return 0;
-        }
-    }
+//    private int calculateScholarship(double cgpa) {
+//
+//        if (cgpa >= 3.8) {
+//            return 50;
+//
+//        } else if (cgpa >= 3.5) {
+//            return 25;
+//
+//        } else if (cgpa >= 3.0) {
+//            return 10;
+//
+//        } else {
+//            return 0;
+//        }
+//    }
 
     private void checkCourseCapacity(String course) {
         int currentStudents = studentRepo.countByCourseIgnoreCaseAndActiveTrue(course);
